@@ -1,16 +1,27 @@
 'use strict';
-require (dotenv).config();
-const storeid = 'driver' ;
-const queue = new Queue(storeid);
-const PORT =process.env.PORT ||3030 ;
-const host ="http://localhost:3000";
-const io = require('socket-io-client');
- class Queue {
-constructor(id){
-    this.id = id;
-    this.socket=io.connect("http://localhost:3000");
-}
 
- }
 
-queue.socket('')
+const clientIo = require('socket.io-client');
+
+let host = 'http://localhost:3000/caps';
+
+const socket = clientIo.connect(host);
+
+socket.on('picking-up',payload =>{
+    
+    setTimeout(()=>{
+        console.log('DRIVER: picked up',payload.orderId);
+        socket.emit('in-transit',payload);
+    },1500);
+    
+    setTimeout(()=>{
+        console.log('DRIVER: delivered up',payload.orderId);
+        socket.emit('delivered',payload);
+    },3000);
+});
+
+socket.emit('get_all');
+socket.on('message_delivered',msg =>{
+    console.log('the message is recived',msg);
+    socket.emit('received',msg)
+});
